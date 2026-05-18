@@ -5,7 +5,7 @@
     <string name="description_post_menu">Post menu</string>
     <string name="description_post_like">Like</string>
     <string name="description_post_share">Share</string>
-    <string name="views_count">5</string>
-    <string name="shares_count">5</string>
-    <string name="likes_count">10</string>
+    <string name="views_count" translatable="false">5</string>
+    <string name="shares_count" translatable="false">5</string>
+    <string name="likes_count" translatable="false">10</string>
 </resources>
