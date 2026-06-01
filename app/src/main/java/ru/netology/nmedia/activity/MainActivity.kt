@@ -1,6 +1,7 @@
 package ru.netology.nmedia.activity
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -54,17 +55,16 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.edited.observe(this) { post ->
             if (post.id != 0L) {
-                binding.content?.let {
-                    with(it) {
-                        setText(post.content)
-                        AndroidUtils.showKeyboard(this)
-                    }
+                with(binding.content) {
+                    setText(post.content)
+                    AndroidUtils.showKeyboard(this)
                 }
+                binding.group?.visibility = View.VISIBLE
             }
         }
 
-        binding.save?.setOnClickListener {
-            binding.content?.let { editText ->
+        binding.save.setOnClickListener {
+            binding.content.let { editText ->
                 if (editText.text.isNullOrBlank()) {
                     Toast.makeText(
                         this@MainActivity,
@@ -79,7 +79,17 @@ class MainActivity : AppCompatActivity() {
                 editText.setText("")
                 editText.clearFocus()
                 AndroidUtils.hideKeyboard(editText)
+                binding.group?.visibility = View.GONE
             }
+        }
+
+        binding.editCancel?.setOnClickListener {
+            with(binding.content) {
+                setText("")
+                clearFocus()
+                AndroidUtils.hideKeyboard(this)
+            }
+            binding.group?.visibility = View.GONE
         }
     }
 }
