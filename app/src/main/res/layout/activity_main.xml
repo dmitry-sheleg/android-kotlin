@@ -36,13 +36,14 @@
     <TextView
         android:id="@+id/editPanel"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:background="@android:color/background_light"
+        android:lineSpacingExtra="8sp"
         android:padding="@dimen/common_spacing"
         android:text="@string/edit_post"
         android:textAlignment="textStart"
         android:textColor="@color/material_dynamic_neutral_variant50"
-        android:textSize="20sp"
+        android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/content"
         app:layout_constraintEnd_toStartOf="@id/editCancel"
@@ -57,7 +58,6 @@
         android:contentDescription="@string/description_edit_cancel"
         app:layout_constraintBottom_toTopOf="@id/content"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/editPanel"
         app:srcCompat="@drawable/outline_cancel_48" />
 
     <androidx.constraintlayout.widget.Barrier
