@@ -57,9 +57,10 @@ class MainActivity : AppCompatActivity() {
             if (post.id != 0L) {
                 with(binding.content) {
                     setText(post.content)
+                    setSelection(text.length)
                     AndroidUtils.showKeyboard(this)
                 }
-                binding.group?.visibility = View.VISIBLE
+                binding.group.visibility = View.VISIBLE
             }
         }
 
@@ -79,17 +80,17 @@ class MainActivity : AppCompatActivity() {
                 editText.setText("")
                 editText.clearFocus()
                 AndroidUtils.hideKeyboard(editText)
-                binding.group?.visibility = View.GONE
+                binding.group.visibility = View.GONE
             }
         }
 
-        binding.editCancel?.setOnClickListener {
+        binding.editCancel.setOnClickListener {
             with(binding.content) {
                 setText("")
                 clearFocus()
                 AndroidUtils.hideKeyboard(this)
             }
-            binding.group?.visibility = View.GONE
+            binding.group.visibility = View.GONE
         }
     }
 }
