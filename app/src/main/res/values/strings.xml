@@ -13,4 +13,5 @@
     <string name="description_edit_cancel">Cancel</string>
     <string name="edit_post">Edit Post</string>
     <string name="description_edit_image">Edit Image</string>
+    <string name="description_post_views">Views</string>
 </resources>
