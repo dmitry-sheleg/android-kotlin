@@ -41,11 +41,9 @@ class PostViewHolder(
             author.text = post.author
             published.text = post.published
             content.text = post.content
-            likeCount.text = numToShortString(post.likes)
-            like.setImageResource(
-                if (post.likedByMe) R.drawable.ic_liked_24 else R.drawable.ic_like_24
-            )
-            shareCount.text = numToShortString(post.shares)
+            like.isChecked = post.likedByMe
+            like.text = numToShortString(post.likes)
+            share.text = numToShortString(post.shares)
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
