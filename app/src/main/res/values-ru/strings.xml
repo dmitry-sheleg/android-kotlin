@@ -11,8 +11,10 @@
     <string name="post_text">Текст</string>
     <string name="menu_edit">Редактировать</string>
     <string name="error_empty_content">Не может быть пустым</string>
+    <string name="chooser_share_post">Поделиться</string>
     <string name="description_edit_cancel">Отмена</string>
     <string name="edit_post">Редактирование</string>
+    <string name="add_post">Добавить пост</string>
     <string name="description_edit_image">Редактирование</string>
     <string name="description_post_views">Просмотров</string>
 </resources>
