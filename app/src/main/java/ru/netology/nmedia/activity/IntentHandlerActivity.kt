@@ -37,7 +37,6 @@ class IntentHandlerActivity : AppCompatActivity() {
                     .show()
                 return@let
             }
-            // TODO: handle text
         }
     }
 }

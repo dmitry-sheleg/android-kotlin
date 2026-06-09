@@ -2,10 +2,8 @@ package ru.netology.nmedia.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.launch
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -15,10 +13,10 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var newPostLauncher: ActivityResultLauncher<Post>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,9 +30,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         val viewModel: PostViewModel by viewModels()
+
+        newPostLauncher = registerForActivityResult(NewPostResultContract) { result ->
+            result ?: return@registerForActivityResult
+            viewModel.save(result)
+        }
         val adapter = PostsAdapter(object : OnInteractionListener {
+
             override fun onEdit(post: Post) {
                 viewModel.edit(post)
+                newPostLauncher.launch(post.copy())
             }
 
             override fun onLike(post: Post) {
@@ -48,7 +53,8 @@ class MainActivity : AppCompatActivity() {
                     putExtra(Intent.EXTRA_TEXT, post.content)
                     type = "text/plain"
                 }
-                val shareIntent = Intent.createChooser(intent, getString(R.string.chooser_share_post))
+                val shareIntent =
+                    Intent.createChooser(intent, getString(R.string.chooser_share_post))
                 startActivity(shareIntent)
 
                 viewModel.shareById(post.id)
@@ -63,13 +69,16 @@ class MainActivity : AppCompatActivity() {
             adapter.submitList(posts)
         }
 
-        val newPostLauncher = registerForActivityResult(NewPostResultContract) { result ->
-            result ?: return@registerForActivityResult
-            viewModel.save(result)
-        }
-
         binding.fab?.setOnClickListener {
-            newPostLauncher.launch()
+            // Для нового поста
+            newPostLauncher.launch(
+                Post(
+                    id = 0L,
+                    author = "",
+                    content = "",
+                    published = ""
+                )
+            )
         }
 
 
