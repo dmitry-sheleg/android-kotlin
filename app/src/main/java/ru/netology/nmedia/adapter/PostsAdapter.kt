@@ -3,13 +3,10 @@ package ru.netology.nmedia.adapter
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -95,8 +92,6 @@ class PostViewHolder(
             share.setOnClickListener {
                 onInteractionListener.onShare(post)
             }
-
-
         }
     }
 
@@ -106,15 +101,10 @@ class PostViewHolder(
 
         try {
             context.startActivity(intent)
-        } catch (ignored: ActivityNotFoundException) {
-            // Открываем в браузере
-            Intent(Intent.ACTION_VIEW, videoUrl.toUri()).also {
-                if (context.packageManager.resolveActivity(it, 0) != null) {
-                    context.startActivity(it)
-                } else {
-                    Toast.makeText(context, "Не найдено приложение для открытия ссылки", Toast.LENGTH_SHORT).show()
-                }
-            }
+        } catch (_: ActivityNotFoundException) {
+            val browserIntent = Intent(Intent.ACTION_VIEW, videoUrl.toUri())
+            val chooserIntent = Intent.createChooser(browserIntent, "Открыть с помощью")
+            context.startActivity(chooserIntent)
         }
     }
 
