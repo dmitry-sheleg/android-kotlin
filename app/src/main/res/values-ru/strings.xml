@@ -17,4 +17,8 @@
     <string name="add_post">Добавить пост</string>
     <string name="description_edit_image">Редактирование</string>
     <string name="description_post_views">Просмотров</string>
+    <string name="content_desc_video_block">Видеоконтент</string>
+    <string name="content_desc_play_button">Открыть видеоконтент</string>
+    <string name="video_link">Ссылка на видео (RUTUBE)</string>
+    <string name="hint_post_content">Post content</string>
 </resources>

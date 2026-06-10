@@ -1,8 +1,16 @@
 package ru.netology.nmedia.adapter
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -45,6 +53,20 @@ class PostViewHolder(
             like.text = numToShortString(post.likes)
             share.text = numToShortString(post.shares)
 
+            // Показываем/скрываем блок с видео в зависимости от наличия ссылки
+            videoBlock.visibility = if (post.video != null) View.VISIBLE else View.GONE
+
+            if (post.video != null) {
+                videoBlock.setOnClickListener {
+                    openVideo(
+                        context = binding.root.context,
+                        videoUrl = post.video
+                    )
+                }
+            } else {
+                videoBlock.setOnClickListener(null)
+            }
+
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     inflate(R.menu.options_post)
@@ -72,6 +94,26 @@ class PostViewHolder(
 
             share.setOnClickListener {
                 onInteractionListener.onShare(post)
+            }
+
+
+        }
+    }
+
+    private fun openVideo(context: Context, videoUrl: String) {
+        val intent = Intent(Intent.ACTION_VIEW, videoUrl.toUri())
+            .apply { setPackage("ru.rutube.app") }
+
+        try {
+            context.startActivity(intent)
+        } catch (ignored: ActivityNotFoundException) {
+            // Открываем в браузере
+            Intent(Intent.ACTION_VIEW, videoUrl.toUri()).also {
+                if (context.packageManager.resolveActivity(it, 0) != null) {
+                    context.startActivity(it)
+                } else {
+                    Toast.makeText(context, "Не найдено приложение для открытия ссылки", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
