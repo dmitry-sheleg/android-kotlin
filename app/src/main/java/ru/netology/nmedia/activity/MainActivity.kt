@@ -1,9 +1,9 @@
 package ru.netology.nmedia.activity
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -13,10 +13,10 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var newPostLauncher: ActivityResultLauncher<Post>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,9 +30,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         val viewModel: PostViewModel by viewModels()
+
+        newPostLauncher = registerForActivityResult(NewPostResultContract) { result ->
+            result ?: return@registerForActivityResult
+            viewModel.save(result)
+        }
         val adapter = PostsAdapter(object : OnInteractionListener {
+
             override fun onEdit(post: Post) {
                 viewModel.edit(post)
+                newPostLauncher.launch(post.copy())
             }
 
             override fun onLike(post: Post) {
@@ -40,6 +47,16 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onShare(post: Post) {
+
+                val intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, post.content)
+                    type = "text/plain"
+                }
+                val shareIntent =
+                    Intent.createChooser(intent, getString(R.string.chooser_share_post))
+                startActivity(shareIntent)
+
                 viewModel.shareById(post.id)
             }
 
@@ -52,46 +69,18 @@ class MainActivity : AppCompatActivity() {
             adapter.submitList(posts)
         }
 
-
-        viewModel.edited.observe(this) { post ->
-            if (post.id != 0L) {
-                with(binding.content) {
-                    setText(post.content)
-                    setSelection(text.length)
-                    AndroidUtils.showKeyboard(this)
-                }
-                binding.group.visibility = View.VISIBLE
-            }
+        binding.fab?.setOnClickListener {
+            // Для нового поста
+            newPostLauncher.launch(
+                Post(
+                    id = 0L,
+                    author = "",
+                    content = "",
+                    published = ""
+                )
+            )
         }
 
-        binding.save.setOnClickListener {
-            binding.content.let { editText ->
-                if (editText.text.isNullOrBlank()) {
-                    Toast.makeText(
-                        this@MainActivity,
-                        this@MainActivity.getString(R.string.error_empty_content),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setOnClickListener
-                }
 
-                viewModel.save(editText.text.toString())
-
-                editText.setText("")
-                editText.clearFocus()
-                AndroidUtils.hideKeyboard(editText)
-                binding.group.visibility = View.GONE
-            }
-        }
-
-        binding.editCancel.setOnClickListener {
-            with(binding.content) {
-                setText("")
-                viewModel.editCancel()
-                clearFocus()
-                AndroidUtils.hideKeyboard(this)
-            }
-            binding.group.visibility = View.GONE
-        }
     }
 }
