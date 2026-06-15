@@ -1,40 +1,47 @@
-package ru.netology.nmedia.activity
+package ru.netology.nmedia.fragment
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import ru.netology.nmedia.databinding.ActivityNewPostBinding
-import ru.netology.nmedia.util.AndroidUtils
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import ru.netology.nmedia.databinding.FragmentNewPostBinding
+import ru.netology.nmedia.util.AndroidUtils
+import ru.netology.nmedia.util.StringArg
+import ru.netology.nmedia.viewmodel.PostViewModel
+import kotlin.getValue
 
-class NewPostActivity : AppCompatActivity() {
+class NewPostFragment1 : Fragment() {
 
-    private companion object {
-        private const val EXTRA_ID = "extra_id"
-        private const val EXTRA_AUTHOR = "extra_author"
-        private const val EXTRA_CONTENT = "extra_content"
-        private const val EXTRA_PUBLISHED = "extra_published"
-        private const val EXTRA_LIKES = "extra_likes"
-        private const val EXTRA_LIKED_BY_ME = "extra_liked_by_me"
-        private const val EXTRA_SHARES = "extra_shares"
-        private const val EXTRA_VIDEO = "extra_video"
+    companion object {
+        const val EXTRA_ID = "extra_id"
+        const val EXTRA_AUTHOR = "extra_author"
+        const val EXTRA_CONTENT = "extra_content"
+        const val EXTRA_PUBLISHED = "extra_published"
+        const val EXTRA_LIKES = "extra_likes"
+        const val EXTRA_LIKED_BY_ME = "extra_liked_by_me"
+        const val EXTRA_SHARES = "extra_shares"
+        const val EXTRA_VIDEO = "extra_video"
+
+        var Bundle.textArg: String? by StringArg
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        val binding = ActivityNewPostBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val binding = FragmentNewPostBinding.inflate(
+            inflater,
+            container,
+            false
+        )
 
+        val intent = Intent()
         val id = intent.getLongExtra(EXTRA_ID, 0L)
         val author = intent.getStringExtra(EXTRA_AUTHOR) ?: ""
         val content = intent.getStringExtra(EXTRA_CONTENT) ?: ""
@@ -45,16 +52,19 @@ class NewPostActivity : AppCompatActivity() {
         // Получаем ссылку на видео (может быть пустой)
         val video = intent.getStringExtra(EXTRA_VIDEO) ?: ""
 
-        binding.edit.setText(content)
+        val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+//        binding.edit.setText(content)
+        arguments?.textArg?.let(binding.edit::setText)
+
         // Заполняем поле для ссылки на видео при редактировании
         binding.editVideo.setText(video)
         AndroidUtils.showKeyboard(binding.edit)
 
         binding.ok.setOnClickListener {
             val newContent = binding.edit.text.toString().trim()
-            if (newContent.isEmpty()) {
-                setResult(RESULT_CANCELED)
-                finish()
+            if (!newContent.isEmpty()) {
+//                setResult(RESULT_CANCELED)
+//                finish()
                 return@setOnClickListener
             }
 
@@ -84,8 +94,11 @@ class NewPostActivity : AppCompatActivity() {
                 // Передаём либо новую ссылку, либо null, если поле пустое
                 putExtra(EXTRA_VIDEO, videoLink)
             }
-            setResult(RESULT_OK, resultIntent)
-            finish()
+//            setResult(RESULT_OK, resultIntent)
+//            finish()
+//            viewModel.save(resultIntent)
         }
+
+        return binding.root
     }
 }
