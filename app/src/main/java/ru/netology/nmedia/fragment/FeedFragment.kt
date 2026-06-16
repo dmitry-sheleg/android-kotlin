@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -17,7 +16,6 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class FeedFragment : Fragment() {
-//    private lateinit var newPostLauncher: ActivityResultLauncher<Post>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,16 +30,11 @@ class FeedFragment : Fragment() {
 
         val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
 
-//        newPostLauncher = registerForActivityResult(NewPostResultContract) { result ->
-//            result ?: return@registerForActivityResult
-//            viewModel.save(result)
-//        }
         val adapter = PostsAdapter(object : OnInteractionListener {
 
             override fun onEdit(post: Post) {
                 viewModel.edit(post)
                 findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
-//                newPostLauncher.launch(post.copy())
             }
 
             override fun onLike(post: Post) {
@@ -73,15 +66,6 @@ class FeedFragment : Fragment() {
 
         binding.fab?.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
-            // Для нового поста
-//            newPostLauncher.launch(
-//                Post(
-//                    id = 0L,
-//                    author = "",
-//                    content = "",
-//                    published = ""
-//                )
-//            )
         }
         return binding.root
     }

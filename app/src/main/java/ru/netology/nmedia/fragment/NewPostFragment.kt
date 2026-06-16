@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -31,29 +32,52 @@ class NewPostFragment : Fragment() {
             false
         )
 
-
         val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
 
-        arguments?.textArg?.let(binding.edit::setText)
+        viewModel.edited.value?.let { existingPost ->
+            binding.edit.setText(existingPost.content)
+            binding.editVideo.setText(existingPost.video ?: "")
+        } ?: run {
+            arguments?.textArg?.let(binding.edit::setText)
+        }
 
         AndroidUtils.showKeyboard(binding.edit)
 
         binding.ok.setOnClickListener {
             val newContent = binding.edit.text.toString().trim()
-            if (!newContent.isEmpty()) {
-                val newPost = Post(
+            if (newContent.isEmpty()) {
+                binding.edit.error = "Пост не может быть пустым"
+                return@setOnClickListener
+            }
+
+            val videoLink = binding.editVideo.text.toString().trim().takeIf { it.isNotBlank() }
+
+            if (videoLink != null) {
+                val uri = videoLink.toUri()
+                val host = uri.host ?: ""
+                if (!host.endsWith("rutube.ru")) {
+                    binding.editVideo.error = "Ссылка должна быть с rutube.ru"
+                    return@setOnClickListener
+                } else {
+                    binding.editVideo.error = null
+                }
+            }
+            val post = if (viewModel.edited.value != null) {
+                viewModel.edited.value!!.copy(content = newContent, video = videoLink)
+            } else {
+                Post(
                     id = 0L,
-                    author = "Me",                 // или брать откуда-то из Auth/ViewModel
+                    author = "Me",
                     content = newContent,
-                    published = "now",              // или использовать DateTime
+                    published = "now",
                     likes = 0,
                     likedByMe = false,
-                    shares = 0
-                    // video нет в вашем Post, поэтому не добавляем
+                    shares = 0,
+                    video = videoLink
                 )
-                viewModel.save(newPost)
-                findNavController().navigateUp()
             }
+            viewModel.save(post)
+            findNavController().navigateUp()
         }
 
         return binding.root
