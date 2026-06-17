@@ -58,6 +58,14 @@ class FeedFragment : Fragment() {
             override fun onRemove(post: Post) {
                 viewModel.removeById(post.id)
             }
+
+            // Открытие отдельного поста
+            override fun onOpenPost(post: Post) {
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_postDetailFragment,
+                    Bundle().apply { putLong("postId", post.id) }
+                )
+            }
         })
         binding.list.adapter = adapter
         viewModel.data.observe(viewLifecycleOwner) { posts ->
