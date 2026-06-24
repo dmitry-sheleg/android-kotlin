@@ -40,6 +40,7 @@ class FCMService : FirebaseMessagingService() {
         message.data[ACTION_KEY]?.let {
             when (Action.valueOf(it)) {
                 Action.LIKE -> handleLike(gson.fromJson(message.data[CONTENT_KEY], Like::class.java))
+                Action.NEW_POST -> handleNewPost(gson.fromJson(message.data[CONTENT_KEY], NewPost::class.java))
             }
         }
     }
@@ -64,6 +65,22 @@ class FCMService : FirebaseMessagingService() {
         notify(notification)
     }
 
+    private fun handleNewPost(content: NewPost) {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(
+                getString(
+                    R.string.notification_new_post,
+                    content.postAuthor,
+                    content.postContent,
+                )
+            )
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        notify(notification)
+    }
+
     private fun notify(notification: Notification) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
@@ -76,6 +93,7 @@ class FCMService : FirebaseMessagingService() {
 
 enum class Action {
     LIKE,
+    NEW_POST,
 }
 
 data class Like(
@@ -83,4 +101,10 @@ data class Like(
     val userName: String,
     val postId: Long,
     val postAuthor: String,
+)
+
+data class NewPost(
+    val postId: Long,
+    val postAuthor: String,
+    val postContent: String,
 )
