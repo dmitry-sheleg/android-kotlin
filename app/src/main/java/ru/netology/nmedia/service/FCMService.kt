@@ -6,6 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -37,10 +38,33 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        message.data[ACTION_KEY]?.let {
-            when (Action.valueOf(it)) {
-                Action.LIKE -> handleLike(gson.fromJson(message.data[CONTENT_KEY], Like::class.java))
-                Action.NEW_POST -> handleNewPost(gson.fromJson(message.data[CONTENT_KEY], NewPost::class.java))
+        val actionString = message.data[ACTION_KEY] ?: return
+        val action = try {
+            Action.valueOf(actionString)
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+
+        when (action) {
+            Action.LIKE -> handleLike(
+                gson.fromJson(
+                    message.data[CONTENT_KEY],
+                    Like::class.java
+                )
+            )
+
+            Action.NEW_POST -> handleNewPost(
+                gson.fromJson(
+                    message.data[CONTENT_KEY],
+                    NewPost::class.java
+                )
+            )
+
+            null -> {
+                Log.w(
+                    "FCMService",
+                    "Получено неизвестное уведомление: $actionString. Data: ${message.data}"
+                )
             }
         }
     }
@@ -50,41 +74,38 @@ class FCMService : FirebaseMessagingService() {
     }
 
     private fun handleLike(content: Like) {
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(
-                getString(
-                    R.string.notification_user_liked,
-                    content.userName,
-                    content.postAuthor,
-                )
-            )
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
+        val notification =
+            NotificationCompat.Builder(this, CHANNEL_ID).setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(
+                    getString(
+                        R.string.notification_user_liked,
+                        content.userName,
+                        content.postAuthor,
+                    )
+                ).setPriority(NotificationCompat.PRIORITY_DEFAULT).build()
 
         notify(notification)
     }
 
     private fun handleNewPost(content: NewPost) {
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(
-                getString(
-                    R.string.notification_new_post,
-                    content.postAuthor,
-                    content.postContent,
+        val notification =
+            NotificationCompat.Builder(this, CHANNEL_ID).setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(
+                    getString(
+                        R.string.notification_new_post, content.postAuthor
+                    )
                 )
-            )
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
+                .setStyle(
+                    NotificationCompat.BigTextStyle().bigText(content.postContent)
+                )
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .build()
 
         notify(notification)
     }
 
     private fun notify(notification: Notification) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        ) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
             NotificationManagerCompat.from(this).notify(Random.nextInt(100_000), notification)
         }
     }
@@ -92,8 +113,7 @@ class FCMService : FirebaseMessagingService() {
 }
 
 enum class Action {
-    LIKE,
-    NEW_POST,
+    LIKE, NEW_POST,
 }
 
 data class Like(
