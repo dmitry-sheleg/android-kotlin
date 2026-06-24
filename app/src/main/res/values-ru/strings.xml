@@ -21,4 +21,9 @@
     <string name="content_desc_play_button">Открыть видеоконтент</string>
     <string name="video_link">Ссылка на видео (RUTUBE)</string>
     <string name="hint_post_content">Post content</string>
+    <string name="google_play_unavailable">Google Api недоступен</string>
+    <string name="notification_user_liked">Пользователь %1$s лайкнул %2$s пост</string>
+    <string name="channel_remote_name">Сервер сообщений</string>
+    <string name="channel_remote_description">Сообщения от удаленного сервера</string>
+    <string name="notification_new_post">%s опубликовал новый пост:%n</string>
 </resources>

@@ -14,12 +14,14 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.util.MyUtils.numToShortString
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
     fun onEdit(post: Post) {}
     fun onRemove(post: Post) {}
     fun onShare(post: Post) {}
+    fun onOpenPost(post: Post)      // открытие отдельного поста
 }
 
 class PostsAdapter(
@@ -92,6 +94,10 @@ class PostViewHolder(
             share.setOnClickListener {
                 onInteractionListener.onShare(post)
             }
+
+            binding.root.setOnClickListener {
+                onInteractionListener.onOpenPost(post)
+            }
         }
     }
 
@@ -107,38 +113,6 @@ class PostViewHolder(
             context.startActivity(chooserIntent)
         }
     }
-
-    fun numToShortString(value: Int): String {
-        return when {
-            value < 10_000 -> {
-                val thousands = value / 1_000
-                val hundreds = (value % 1_000) / 100
-
-                if (thousands == 0) {
-                    value.toString()
-                } else if (hundreds == 0) {
-                    "${thousands}K"  // Убираем точку и ноль, если сотни = 0
-                } else {
-                    "${thousands}.${hundreds}K"
-                }
-            }
-
-            value in 10_000 until 1_000_000 -> {
-                "${value / 1_000}K"  // Всегда без дробной части
-            }
-
-            else -> {
-                val millions = value / 1_000_000
-                val hundredThousands = (value % 1_000_000) / 100_000
-
-                if (hundredThousands == 0) {
-                    "${millions}M"  // Убираем точку и ноль, если сотни тысяч = 0
-                } else {
-                    "${millions}.${hundredThousands}M"
-                }
-            }
-        }
-    }
 }
 
 object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
@@ -150,6 +124,5 @@ object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
     override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
         return oldItem == newItem
     }
-
 }
 

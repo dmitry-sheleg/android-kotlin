@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.ksp)
+    id ("com.google.gms.google-services") version "4.5.0"
 }
 
 android {
@@ -43,8 +45,15 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.material)
     implementation(libs.gson)
+    implementation(libs.androidx.room)
+    ksp(libs.androidx.room.compiler)
+    implementation(platform(libs.firebase))
+    implementation(libs.firebase.messaging)
+    implementation(libs.play.services)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

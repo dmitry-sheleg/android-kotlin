@@ -20,4 +20,9 @@
     <string name="content_desc_play_button">Content video play button</string>
     <string name="video_link">Ссылка на видео (RUTUBE)</string>
     <string name="hint_post_content">Post content</string>
+    <string name="google_play_unavailable">Google Api Unavailable</string>
+    <string name="notification_user_liked">User %1$s liked %2$s\'s post</string>
+    <string name="channel_remote_name">Server notifications</string>
+    <string name="channel_remote_description">Notifications from remote server</string>
+    <string name="notification_new_post">%s created new post:%n</string>
 </resources>
