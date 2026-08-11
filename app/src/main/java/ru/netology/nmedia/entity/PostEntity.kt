@@ -1,54 +1,25 @@
 package ru.netology.nmedia.entity
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import ru.netology.nmedia.dto.Post
 
-@Entity(tableName = "posts")
+@Entity
 data class PostEntity(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
     val id: Long,
-    @ColumnInfo(name = "author")
     val author: String,
-    @ColumnInfo(name = "content")
     val content: String,
-    @ColumnInfo(name = "published")
-    val published: String,
-    @ColumnInfo(name = "likes")
-    val likes: Int = 0,
-    @ColumnInfo(name = "likedByMe")
+    val published: Long,
     val likedByMe: Boolean,
-    @ColumnInfo(name = "shares")
-    val shares: Int = 0,
-    @ColumnInfo(name = "video")
-    val video: String? = null
+    val likes: Int = 0,
 ) {
-    fun toDto(): Post = Post(
-        id = id,
-        author = author,
-        content = content,
-        published = published,
-        likes = likes,
-        likedByMe = likedByMe,
-        shares = shares,
-        video = video
-    )
+    fun toDto() = Post(id, author, content, published, likedByMe, likes)
 
     companion object {
-        fun fromDto(dto: Post): PostEntity = with(dto) {
-            PostEntity(
-            id = id,
-            author = author,
-            content = content,
-            published = published,
-            likes = likes,
-            likedByMe = likedByMe,
-            shares = shares,
-            video = video
-            )
-        }
+        fun fromDto(dto: Post) =
+            PostEntity(dto.id, dto.author, dto.content, dto.published, dto.likedByMe, dto.likes)
+
     }
 }
 
