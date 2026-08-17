@@ -64,5 +64,6 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.play.services)
     implementation(libs.okhttp)
+    implementation(libs.glide)
     coreLibraryDesugaring(libs.desugaring)
 }
