@@ -173,12 +173,6 @@ class PostRepositoryImpl: PostRepository {
                 } catch (e: Exception) {
                     callback.onError(e)
                 }
-//                if (response.isSuccessful) {
-//                    callback.onSuccess()
-//                } else {
-//                    callback.onError(IOException("HTTP ${response.code}"))
-//                }
-//                response.close()
             }
 
             override fun onFailure(call: Call, e: IOException) {
@@ -214,13 +208,7 @@ class PostRepositoryImpl: PostRepository {
                     callback.onError(e)
                 }
             }
-//                if (response.isSuccessful) {
-//                    callback.onSuccess()
-//                } else {
-//                    callback.onError(IOException("HTTP ${response.code}"))
-//                }
-//                response.close()
-//            }
+
 
             override fun onFailure(call: Call, e: IOException) {
                 callback.onError(e)
