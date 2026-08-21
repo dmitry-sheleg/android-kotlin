@@ -10,20 +10,30 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
+import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.dto.Post
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 
-class PostRepositoryImpl: PostRepository {
+class PostRepositoryImpl : PostRepository {
+    private val logging = HttpLoggingInterceptor().apply {
+        if (BuildConfig.DEBUG) {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+    }
+
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor(logging)
         .build()
+
     private val gson = Gson()
     private val typeToken = object : TypeToken<List<Post>>() {}
 
     companion object {
-        private const val BASE_URL = "http://10.0.2.2:9999"
+        private const val BASE_URL = BuildConfig.BASE_URL
         private val jsonType = "application/json".toMediaType()
     }
 
@@ -44,25 +54,30 @@ class PostRepositoryImpl: PostRepository {
         val request: Request = Request.Builder()
             .url("${BASE_URL}/api/slow/posts")
             .build()
-        println("11 ${Thread.currentThread().name}")
         client.newCall(request)
-            .enqueue(object: Callback {
+            .enqueue(object : Callback {
+
                 override fun onResponse(call: Call, response: Response) {
-                    val body = response.body?.string() ?: throw RuntimeException("Empty body")
+                    if (!response.isSuccessful) {
+                        return callback.onError(response.code)
+                    }
+
+                    val body = response.body?.string() ?: return callback.onError(response.code)
+
                     try {
-                        println("12 ${Thread.currentThread().name}")
                         callback.onSuccess(gson.fromJson(body, typeToken.type))
                     } catch (e: Exception) {
-                        callback.onError(e)
+                        callback.onError(null)
+                    } finally {
+                        response.close()
                     }
                 }
 
                 override fun onFailure(call: Call, e: IOException) {
-                    callback.onError(e)
+                    callback.onError(null)
                 }
 
             })
-        println("13 ${Thread.currentThread().name}")
     }
 
     override fun likeById(id: Long): Post {
@@ -71,40 +86,41 @@ class PostRepositoryImpl: PostRepository {
             .post(RequestBody.EMPTY)
             .build()
 
-
         val response = client.newCall(request).execute()
-
         val responseText = response.body.string()
 
         return gson.fromJson(responseText, Post::class.java)
     }
+
     override fun likeByIdAsync(id: Long, callback: PostRepository.LikeCallback) {
         val request = Request.Builder()
             .url("$BASE_URL/api/posts/$id/likes")
             .post(RequestBody.EMPTY)
             .build()
-        println("21 ${Thread.currentThread().name}")
+
         client.newCall(request).enqueue(object : Callback {
+
             override fun onResponse(call: Call, response: Response) {
+                if (!response.isSuccessful) {
+                    return callback.onError(response.code)
+                }
+
+                val body = response.body?.string() ?: return callback.onError(response.code)
+
                 try {
-                    println("22 ${Thread.currentThread().name}")
-                    val body = response.body?.string() ?: throw IOException("Empty response")
                     callback.onSuccess(gson.fromJson(body, Post::class.java))
                 } catch (e: Exception) {
-                    callback.onError(e)
+                    callback.onError(null)
                 } finally {
                     response.close()
                 }
             }
 
             override fun onFailure(call: Call, e: IOException) {
-                callback.onError(e)
+                callback.onError(null)
             }
         })
-        println("23 ${Thread.currentThread().name}")
     }
-
-
 
 
     override fun unlikeById(id: Long): Post {
@@ -113,9 +129,7 @@ class PostRepositoryImpl: PostRepository {
             .delete(RequestBody.EMPTY)
             .build()
 
-
         val response = client.newCall(request).execute()
-
         val responseText = response.body.string()
 
         return gson.fromJson(responseText, Post::class.java)
@@ -127,25 +141,28 @@ class PostRepositoryImpl: PostRepository {
             .delete()
             .build()
 
-        println("31 ${Thread.currentThread().name}")
         client.newCall(request).enqueue(object : Callback {
+
             override fun onResponse(call: Call, response: Response) {
+                if (!response.isSuccessful) {
+                    return callback.onError(response.code)
+                }
+
+                val body = response.body?.string() ?: return callback.onError(response.code)
+
                 try {
-                    println("32 ${Thread.currentThread().name}")
-                    val body = response.body?.string() ?: throw IOException("Empty response")
                     callback.onSuccess(gson.fromJson(body, Post::class.java))
                 } catch (e: Exception) {
-                    callback.onError(e)
+                    callback.onError(null)
                 } finally {
                     response.close()
                 }
             }
 
             override fun onFailure(call: Call, e: IOException) {
-                callback.onError(e)
+                callback.onError(null)
             }
         })
-        println("33 ${Thread.currentThread().name}")
     }
 
     override fun save(post: Post) {
@@ -164,22 +181,21 @@ class PostRepositoryImpl: PostRepository {
             .url("$BASE_URL/api/slow/posts")
             .post(gson.toJson(post).toRequestBody(jsonType))
             .build()
-        println("41 ${Thread.currentThread().name}")
+
         client.newCall(request).enqueue(object : Callback {
+
             override fun onResponse(call: Call, response: Response) {
                 try {
-                    println("42 ${Thread.currentThread().name}")
                     callback.onSuccess()
                 } catch (e: Exception) {
-                    callback.onError(e)
+                    callback.onError(null)
                 }
             }
 
             override fun onFailure(call: Call, e: IOException) {
-                callback.onError(e)
+                callback.onError(null)
             }
         })
-        println("43 ${Thread.currentThread().name}")
     }
 
     override fun removeById(id: Long) {
@@ -198,22 +214,26 @@ class PostRepositoryImpl: PostRepository {
             .url("$BASE_URL/api/slow/posts/$id")
             .delete()
             .build()
-        println("51 ${Thread.currentThread().name}")
+
         client.newCall(request).enqueue(object : Callback {
+
             override fun onResponse(call: Call, response: Response) {
                 try {
                     println("52 ${Thread.currentThread().name}")
+                    if (!response.isSuccessful) {
+                        return callback.onError(response.code)
+                    }
                     callback.onSuccess()
                 } catch (e: Exception) {
-                    callback.onError(e)
+                    callback.onError(null)
+                } finally {
+                    response.close()
                 }
             }
 
-
             override fun onFailure(call: Call, e: IOException) {
-                callback.onError(e)
+                callback.onError(null)
             }
         })
-        println("53 ${Thread.currentThread().name}")
     }
 }

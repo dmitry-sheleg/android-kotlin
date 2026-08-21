@@ -56,8 +56,15 @@ class FeedFragment : Fragment() {
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
             binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error
-            binding.emptyText.isVisible = state.empty
+
+            if (state.error) {
+                binding.errorGroup.isVisible = true
+                binding.retryTitle.text = state.errorMessage ?: getString(R.string.error_loading)
+                binding.emptyText.isVisible = false
+            } else {
+                binding.errorGroup.isVisible = false
+                binding.emptyText.isVisible = state.empty
+            }
         }
 
         binding.retryButton.setOnClickListener {

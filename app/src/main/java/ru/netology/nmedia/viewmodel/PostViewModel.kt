@@ -42,8 +42,20 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
             }
 
-            override fun onError(e: Exception) {
-                _data.postValue(FeedModel(error = true))
+            override fun onError(code: Int?) {
+                val message = when (code) {
+                    404 -> "Ошибка 404. Не найден список постов"
+                    500 -> "Ошибка сервера 500. Попробуйте позже"
+                    null -> "Нет соединения с сервером"
+                    else -> "Ошибка: код $code"
+                }
+                _data.postValue(
+                    FeedModel(
+                        loading = false,
+                        error = true,
+                        errorMessage = message
+                    )
+                )
             }
         })
     }
@@ -55,7 +67,21 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                     _postCreated.postValue(Unit)
                 }
 
-                override fun onError(e: Exception) {}
+                override fun onError(code: Int?) {
+                    val message = when (code) {
+                        404 -> "Ошибка 404. Не найден список постов"
+                        500 -> "Ошибка сервера 500. Попробуйте позже"
+                        null -> "Нет соединения с сервером"
+                        else -> "Ошибка: код $code"
+                    }
+                    _data.postValue(
+                        FeedModel(
+                            loading = false,
+                            error = true,
+                            errorMessage = message
+                        )
+                    )
+                }
             })
             edited.value = empty
         }
@@ -86,7 +112,20 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
 
-            override fun onError(e: Exception) {
+            override fun onError(code: Int?) {
+                val message = when (code) {
+                    404 -> "Ошибка 404. Не найден список постов"
+                    500 -> "Ошибка сервера 500. Попробуйте позже"
+                    null -> "Нет соединения с сервером"
+                    else -> "Ошибка: код $code"
+                }
+                _data.postValue(
+                    FeedModel(
+                        loading = false,
+                        error = true,
+                        errorMessage = message
+                    )
+                )
             }
         }
 
@@ -109,8 +148,21 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             override fun onSuccess() {
             }
 
-            override fun onError(e: Exception) {
-                _data.postValue(_data.value?.copy(posts = old))
+            override fun onError(code: Int?) {
+                val message = when (code) {
+                    404 -> "Ошибка 404.Пост не найден"
+                    500 -> "Ошибка сервера 500. Пост не удалён"
+                    null -> "Нет соединения с сервером. Пост не удалён"
+                    else -> "Ошибка: код $code."
+                }
+
+                _data.postValue(
+                    _data.value?.copy(
+                        posts = old,
+                        error = true,
+                        errorMessage = message
+                    ) ?: FeedModel(posts = old, error = true, errorMessage = message)
+                )
             }
         })
     }
